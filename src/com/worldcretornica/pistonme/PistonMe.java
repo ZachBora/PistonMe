@@ -2,15 +2,11 @@ package com.worldcretornica.pistonme;
 
 import java.util.Random;
 
-import net.minecraft.server.v1_4_R1.BlockPistonMoving;
-import net.minecraft.server.v1_4_R1.TileEntity;
-import net.minecraft.server.v1_4_R1.WorldServer;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_4_R1.CraftWorld;
+import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -49,11 +45,15 @@ public class PistonMe extends JavaPlugin implements Listener
 		}
 	}	
 	
-	
 	public void moveBlocks(Block block) 
 	{		
+		//block.setData((byte) (block.getData() | 8));
+
+		//block.setTypeIdAndData(block.getTypeId(), (byte) (block.getData() | 8), false);
+
         if (testeachblocks(block)) 
         {
+        	this.getLogger().info("3");
         	block.setData((byte) (block.getData() | 8));
         	
             Random rand = new Random(block.getWorld().getSeed());
@@ -96,12 +96,21 @@ public class PistonMe extends JavaPlugin implements Listener
 
             //if (currentblock.getType() != Material.AIR) 
             //{
-                if (!canPush(currentblock, true)) 
-                    return false;
-
-                if (nbBlocksPushed == 12) 
-                	foundair = true; //return false;
-                
+            	//this.getLogger().info("type:" + currentblock.getTypeId());
+            	if(currentblock.getType() != Material.AIR && currentblock.getPistonMoveReaction() != null && currentblock.getPistonMoveReaction() == PistonMoveReaction.BREAK)
+            	{
+            		//this.getLogger().info("type:" + currentblock.getTypeId() + " " + currentblock.getX() + "," + currentblock.getY() + "," + currentblock.getZ());
+            		currentblock.breakNaturally();
+            		currentblock.setTypeIdAndData(Material.AIR.getId(), (byte) 0, true);
+            	}
+            	else
+            	{
+	                if (!canPush(currentblock, true)) 
+	                    return false;
+	
+	                if (nbBlocksPushed == 12) 
+	                	foundair = true; //return false;
+            	}
                 ++nbBlocksPushed;
             //}
             //else
@@ -118,23 +127,26 @@ public class PistonMe extends JavaPlugin implements Listener
             Material mat = currentblock.getType();
             byte data = currentblock.getData();
 
-            WorldServer w = ((CraftWorld) block.getWorld()).getHandle();
+            //WorldServer w = ((CraftWorld) block.getWorld()).getHandle();
             
             if (mat.equals(block.getType()) && currentblock.getLocation().distance(block.getLocation()) == 0) 
             {
-                w.setRawTypeIdAndData(currentblock.getX() + xmod, currentblock.getY() + ymod, currentblock.getZ() + zmod, net.minecraft.server.v1_4_R1.Block.PISTON_MOVING.id, block.getData() | 0, false);
+                //w.setRawTypeIdAndData(currentblock.getX() + xmod, currentblock.getY() + ymod, currentblock.getZ() + zmod, net.minecraft.server.v1_4_R1.Block.PISTON_MOVING.id, block.getData() | 0, false);
 
-                TileEntity te = BlockPistonMoving.a(net.minecraft.server.v1_4_R1.Block.PISTON_EXTENSION.id, block.getData() | 0, block.getData(), true, false);
-                
-            	w.setTileEntity(currentblock.getX() + xmod, currentblock.getY() + ymod, currentblock.getZ() + zmod, te);
+                //TileEntity te = BlockPistonMoving.a(net.minecraft.server.v1_4_R1.Block.PISTON_EXTENSION.id, block.getData() | 0, block.getData(), true, false);
+            	//block.setTypeIdAndData(block.getTypeId(), (byte) (block.getData() | 8), false);
+            	//w.setTileEntity(currentblock.getX() + xmod, currentblock.getY() + ymod, currentblock.getZ() + zmod, te);
+            	block.getWorld().getBlockAt(currentblock.getX() + xmod, currentblock.getY() + ymod, currentblock.getZ() + zmod).setTypeIdAndData(Material.PISTON_EXTENSION.getId(), (byte) (block.getData() | 0), false);
             } 
             else 
             {
-                w.setRawTypeIdAndData(currentblock.getX() + xmod, currentblock.getY() + ymod, currentblock.getZ() + zmod, net.minecraft.server.v1_4_R1.Block.PISTON_MOVING.id, data, false);
+                //w.setRawTypeIdAndData(currentblock.getX() + xmod, currentblock.getY() + ymod, currentblock.getZ() + zmod, net.minecraft.server.v1_4_R1.Block.PISTON_MOVING.id, data, false);
 
-                TileEntity te = BlockPistonMoving.a(mat.getId(), data, block.getData(), true, false);
+                //TileEntity te = BlockPistonMoving.a(mat.getId(), data, block.getData(), true, false);
 
-                w.setTileEntity(currentblock.getX() + xmod, currentblock.getY() + ymod, currentblock.getZ() + zmod, te);
+                //w.setTileEntity(currentblock.getX() + xmod, currentblock.getY() + ymod, currentblock.getZ() + zmod, te);
+            	block.getWorld().getBlockAt(currentblock.getX() + xmod, currentblock.getY() + ymod, currentblock.getZ() + zmod).setTypeIdAndData(mat.getId(), (byte) data, false);
+            	//block.getWorld().getBlockAt(currentblock.getX() + xmod, currentblock.getY() + ymod, currentblock.getZ() + zmod).setTypeId(mat.getId(), false);
             }
 
             nbBlocksPushed--;
