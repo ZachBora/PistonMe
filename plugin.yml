@@ -1,0 +1,5 @@
+name: PistonMe
+main: com.worldcretornica.pistonme.PistonMe
+version: 0.1
+description: >
+             Add functionnality to pistons
